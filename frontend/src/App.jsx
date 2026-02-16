@@ -45,7 +45,7 @@ function App() {
           <p className="text-gray-400">Try dragging the box below!</p>
         </div>
       </div>
-      <DraggableBox />
+      <DraggableBox user={user} />
     </div>
   )
 }

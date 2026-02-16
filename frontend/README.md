@@ -1,16 +1,184 @@
-# React + Vite
+# Moving Box - Real-Time Collaborative Box
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A real-time web application demonstrating WebSocket-based synchronization using Cloudflare Durable Objects. Multiple users can drag a box and see it move synchronously across all connected clients.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Real-time synchronization** - Box position updates instantly across all connected users
+- **Authentication** - Secure login with Supabase (email/password)
+- **WebSocket communication** - Low-latency updates via WebSocket protocol
+- **Durable Objects** - Persistent state management with Cloudflare Durable Objects
+- **Responsive UI** - Clean, modern interface with Tailwind CSS
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Frontend:**
+- React - JavaScript library for the UI
+- Vite - Fast development tool
+- Tailwind CSS - For styling
+- Supabase - Handles user login
 
-## Expanding the ESLint configuration
+**Backend:**
+- Cloudflare Workers - Runs the server code globally
+- Hono - Lightweight web framework
+- Durable Objects - Manages WebSocket connections
+- WebSocket - Enables real-time updates
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Database & Auth
+- **Supabase PostgreSQL** - User authentication
+- **Supabase Auth** - JWT-based authentication
+
+## Project Structure
+```
+moving-box/
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx              # Main app component with auth logic
+│   │   ├── Login.jsx            # Login/signup UI
+│   │   ├── DraggableBox.jsx     # Draggable box with WebSocket
+│   │   ├── supabaseClient.js    # Supabase configuration
+│   │   └── index.css            # Tailwind imports
+│   ├── tailwind.config.js
+│   ├── postcss.config.js
+│   └── package.json
+├── backend/
+│   ├── src/
+│   │   └── index.js             # Worker + Durable Object
+│   ├── wrangler.toml            # Cloudflare configuration
+│   └── package.json
+└── README.md
+
+## How It Works
+
+1. User logs in with email/password
+2. Browser connects to the server via WebSocket
+3. When user drags the box, new position is sent to server
+4. Server broadcasts the position to all connected users
+5. Everyone's box moves to the same position
+
+### Key Technologies Explained
+
+**Durable Objects:**
+- Singleton pattern - one instance per "room"
+- Maintains WebSocket connections in memory
+- Broadcasts position updates to all connected clients
+- Survives across requests (stateful)
+
+**WebSocket:**
+- Persistent bidirectional connection
+- Low latency (~10-50ms) updates
+- Eliminates need for polling
+
+## Setup Instructions
+
+### Prerequisites
+
+- Node.js v18+ and npm
+- Cloudflare account
+- Supabase account
+
+### Installation
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/emmanobadi/moving-box.git
+cd moving-box
+```
+
+**2. Set up Frontend**
+```bash
+cd frontend
+npm install
+```
+
+Create `src/supabaseClient.js` with your Supabase credentials:
+```js
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = 'YOUR_SUPABASE_URL'
+const supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY'
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+```
+
+**3. Set up Backend**
+```bash
+cd ../backend
+npm install
+```
+
+**4. Configure Supabase**
+
+- Go to your Supabase project
+- Enable Email authentication
+- Disable email confirmation (for testing)
+
+### Running Locally
+
+**Terminal 1 - Backend:**
+```bash
+cd backend
+npx wrangler dev
+```
+
+**Terminal 2 - Frontend:**
+```bash
+cd frontend
+npm run dev
+```
+
+Open `http://localhost:5173` in multiple browser tabs to test real-time sync.
+
+### Deployment
+
+**Deploy Worker to Cloudflare:**
+```bash
+cd backend
+npx wrangler deploy
+```
+
+**Deploy Frontend:**
+
+Frontend can be deployed to Vercel, Netlify, or Cloudflare Pages. Update the WebSocket URL in `DraggableBox.jsx` to your deployed Worker URL.
+
+## Usage
+
+1. **Sign up** - Create an account with email/password
+2. **Login** - Access the main app
+3. **Drag the box** - Click and drag the blue box
+4. **Open multiple tabs** - See the box move in real-time across all tabs
+5. **Connection status** - Green badge = connected, Red = disconnected
+
+## Testing Real-Time Sync
+
+1. Open the app in two browser windows side-by-side
+2. Log in to both windows
+3. Drag the box in one window
+4. Observe the box moving simultaneously in the other window
+
+## Future Enhancements
+
+- Different colored boxes for each user
+- Show who's online
+- Multiple rooms (different boxes)
+- Save position to database
+- Add chat feature
+
+## Challenges & Solutions
+
+**Challenge:** Tailwind CSS v4 uses different syntax than v3
+**Solution:** Updated `index.css` to use `@import "tailwindcss"` instead of `@tailwind` directives
+
+**Challenge:** WebSocket connections across browser tabs
+**Solution:** Each tab maintains independent WebSocket connection to the same Durable Object instance
+
+**Challenge:** Authentication with WebSocket
+**Solution:** Pass user ID as query parameter in WebSocket URL
+
+## License
+
+MIT
+
+## Author
+
+Emman Obadi - [GitHub](https://github.com/emmanobadi)

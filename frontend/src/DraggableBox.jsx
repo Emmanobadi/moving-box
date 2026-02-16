@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-export default function DraggableBox() {
+export default function DraggableBox({ user }) {
   const [position, setPosition] = useState({ x: 100, y: 100 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
@@ -9,7 +9,7 @@ export default function DraggableBox() {
 
   useEffect(() => {
     // Connect to WebSocket
-    const websocket = new WebSocket('ws://127.0.0.1:8787/ws')
+    const websocket = new WebSocket(`ws://127.0.0.1:8787/ws?userId=${user.id}`)
     
     websocket.onopen = () => {
       console.log('WebSocket connected')
