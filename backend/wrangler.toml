@@ -6,5 +6,9 @@ compatibility_date = "2024-01-01"
 name = "BOX_STATE"
 class_name = "BoxRoom"
 
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["BoxRoom"]
+
 [env.production]
 workers_dev = false

@@ -3,7 +3,7 @@ import { cors } from 'hono/cors'
 
 const app = new Hono()
 
-// Enable CORS so frontend can connect
+// Enable CORS
 app.use('/*', cors({
   origin: '*',
   credentials: true,
@@ -14,12 +14,20 @@ app.get('/', (c) => {
   return c.json({ message: 'Moving Box API is running!' })
 })
 
-// WebSocket upgrade endpoint
+// WebSocket upgrade endpoint with auth
 app.get('/ws', async (c) => {
   const upgradeHeader = c.req.header('Upgrade')
   
   if (!upgradeHeader || upgradeHeader !== 'websocket') {
     return c.text('Expected WebSocket', 426)
+  }
+
+  // Get user ID from query parameter (passed from frontend)
+  const url = new URL(c.req.url)
+  const userId = url.searchParams.get('userId')
+  
+  if (!userId) {
+    return c.text('Unauthorized', 401)
   }
 
   // Get the Durable Object
@@ -31,7 +39,7 @@ app.get('/ws', async (c) => {
 
 export default app
 
-// Durable Object class for managing WebSocket connections
+// Durable Object class
 export class BoxRoom {
   constructor(state, env) {
     this.state = state
@@ -45,7 +53,12 @@ export class BoxRoom {
     const [client, server] = Object.values(webSocketPair)
 
     server.accept()
-    this.sessions.push(server)
+    
+    // Get user info from URL
+    const url = new URL(request.url)
+    const userId = url.searchParams.get('userId')
+    
+    this.sessions.push({ socket: server, userId })
 
     // Send current position to new client
     server.send(JSON.stringify({
@@ -61,10 +74,11 @@ export class BoxRoom {
         
         // Broadcast to all connected clients
         this.sessions.forEach(session => {
-          if (session.readyState === 1) { // 1 = OPEN
-            session.send(JSON.stringify({
+          if (session.socket.readyState === 1) {
+            session.socket.send(JSON.stringify({
               type: 'position',
-              data: this.position
+              data: this.position,
+              userId: userId
             }))
           }
         })
@@ -72,7 +86,7 @@ export class BoxRoom {
     })
 
     server.addEventListener('close', () => {
-      this.sessions = this.sessions.filter(s => s !== server)
+      this.sessions = this.sessions.filter(s => s.socket !== server)
     })
 
     return new Response(null, {
