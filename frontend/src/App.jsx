@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabaseClient'
 import Login from './Login'
+import DraggableBox from './DraggableBox'
 
 function App() {
   const [user, setUser] = useState(null)
@@ -40,10 +41,11 @@ function App() {
           </button>
         </div>
         <div className="bg-gray-800 p-6 rounded-lg">
-          <p>Logged in as: {user.email}</p>
-          <p className="text-gray-400 mt-2">Draggable box coming next...</p>
+          <p className="mb-4">Logged in as: {user.email}</p>
+          <p className="text-gray-400">Try dragging the box below!</p>
         </div>
       </div>
+      <DraggableBox />
     </div>
   )
 }
