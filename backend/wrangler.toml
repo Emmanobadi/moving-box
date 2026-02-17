@@ -10,5 +10,10 @@ class_name = "BoxRoom"
 tag = "v1"
 new_sqlite_classes = ["BoxRoom"]
 
+[[kv_namespaces]]
+binding = "USER_CACHE"
+id = "99a16a9978634ff194b9c91350a7c1bb"
+preview_id = "99a16a9978634ff194b9c91350a7c1bb"
+
 [env.production]
 workers_dev = false

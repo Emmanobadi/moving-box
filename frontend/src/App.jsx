@@ -7,14 +7,30 @@ function App() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  const cacheUserProfile = async (user) => {
+    try {
+      await fetch('http://127.0.0.1:8787/cache-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, email: user.email })
+      })
+    } catch (err) {
+      console.error('Failed to cache user profile:', err)
+    }
+  }
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
+      const currentUser = session?.user ?? null
+      setUser(currentUser)
+      if (currentUser) cacheUserProfile(currentUser)
       setLoading(false)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+      const currentUser = session?.user ?? null
+      setUser(currentUser)
+      if (currentUser) cacheUserProfile(currentUser)
     })
 
     return () => subscription.unsubscribe()

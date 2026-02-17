@@ -22,7 +22,6 @@ app.get('/ws', async (c) => {
     return c.text('Expected WebSocket', 426)
   }
 
-  // Get user ID from query parameter (passed from frontend)
   const url = new URL(c.req.url)
   const userId = url.searchParams.get('userId')
   
@@ -30,11 +29,41 @@ app.get('/ws', async (c) => {
     return c.text('Unauthorized', 401)
   }
 
-  // Get the Durable Object
+
   const id = c.env.BOX_STATE.idFromName('main-room')
   const stub = c.env.BOX_STATE.get(id)
   
   return stub.fetch(c.req.raw)
+})
+
+// Cache user profile in KV
+app.post('/cache-user', async (c) => {
+  const { userId, email } = await c.req.json()
+  
+  if (!userId || !email) {
+    return c.json({ error: 'Missing userId or email' }, 400)
+  }
+
+  const profile = { userId, email, cachedAt: new Date().toISOString() }
+  
+  await c.env.USER_CACHE.put(userId, JSON.stringify(profile), {
+    expirationTtl: 86400
+  })
+
+  return c.json({ message: 'Profile cached', profile })
+})
+
+// Get cached user profile
+app.get('/cache-user/:userId', async (c) => {
+  const userId = c.req.param('userId')
+  
+  const cached = await c.env.USER_CACHE.get(userId)
+  
+  if (!cached) {
+    return c.json({ message: 'Not in cache' }, 404)
+  }
+
+  return c.json({ profile: JSON.parse(cached), source: 'cache' })
 })
 
 export default app
@@ -54,13 +83,11 @@ export class BoxRoom {
 
     server.accept()
     
-    // Get user info from URL
     const url = new URL(request.url)
     const userId = url.searchParams.get('userId')
     
     this.sessions.push({ socket: server, userId })
 
-    // Send current position to new client
     server.send(JSON.stringify({
       type: 'position',
       data: this.position
@@ -72,7 +99,6 @@ export class BoxRoom {
       if (message.type === 'move') {
         this.position = message.data
         
-        // Broadcast to all connected clients
         this.sessions.forEach(session => {
           if (session.socket.readyState === 1) {
             session.socket.send(JSON.stringify({
