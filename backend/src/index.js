@@ -29,7 +29,6 @@ app.get('/ws', async (c) => {
     return c.text('Unauthorized', 401)
   }
 
-
   const id = c.env.BOX_STATE.idFromName('main-room')
   const stub = c.env.BOX_STATE.get(id)
   
@@ -88,10 +87,19 @@ export class BoxRoom {
     
     this.sessions.push({ socket: server, userId })
 
+    // Send current position and active users to new client
     server.send(JSON.stringify({
-      type: 'position',
-      data: this.position
+      type: 'init',
+      position: this.position,
+      users: this.sessions.map(s => s.userId)
     }))
+
+    // Broadcast new user joined to others
+    this.broadcast({
+      type: 'user-joined',
+      userId: userId,
+      users: this.sessions.map(s => s.userId)
+    }, server)
 
     server.addEventListener('message', (event) => {
       const message = JSON.parse(event.data)
@@ -99,25 +107,36 @@ export class BoxRoom {
       if (message.type === 'move') {
         this.position = message.data
         
-        this.sessions.forEach(session => {
-          if (session.socket.readyState === 1) {
-            session.socket.send(JSON.stringify({
-              type: 'position',
-              data: this.position,
-              userId: userId
-            }))
-          }
+        this.broadcast({
+          type: 'position',
+          data: this.position,
+          userId: userId
         })
       }
     })
 
     server.addEventListener('close', () => {
       this.sessions = this.sessions.filter(s => s.socket !== server)
+      
+      // Broadcast user left
+      this.broadcast({
+        type: 'user-left',
+        userId: userId,
+        users: this.sessions.map(s => s.userId)
+      })
     })
 
     return new Response(null, {
       status: 101,
       webSocket: client,
+    })
+  }
+
+  broadcast(message, exclude = null) {
+    this.sessions.forEach(session => {
+      if (session.socket !== exclude && session.socket.readyState === 1) {
+        session.socket.send(JSON.stringify(message))
+      }
     })
   }
 }
