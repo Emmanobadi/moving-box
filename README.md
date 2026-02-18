@@ -5,7 +5,8 @@ A real-time web application demonstrating WebSocket-based synchronization using 
 ## Features
 
 - **Real-time synchronization** - Box position updates instantly across all connected users
-- **Authentication** - Secure login with Supabase (email/password)
+- **Authentication** - Secure login with Supabase (Email/Password + Google OAuth)
+- **User Presence** - Displays online connection status in real-time
 - **WebSocket communication** - Low-latency updates via WebSocket protocol
 - **Durable Objects** - Persistent state management with Cloudflare Durable Objects
 - **Responsive UI** - Clean, modern interface with Tailwind CSS
@@ -26,7 +27,8 @@ A real-time web application demonstrating WebSocket-based synchronization using 
 
 ### Database & Auth
 - **Supabase PostgreSQL** - User authentication
-- **Supabase Auth** - JWT-based authentication
+- **Supabase Auth** - JWT-based authentication (Email + Google OAuth)
+- **Supabase Realtime Presence** - Tracks active users
 
 ## Project Structure
 ```
@@ -55,6 +57,14 @@ moving-box/
 3. When user drags the box, new position is sent to server
 4. Server broadcasts the position to all connected users
 5. Everyone's box moves to the same position
+
+### How Authentication works
+
+1. User logs in via Email/Password or Google OAuth
+2. Supabase returns a JWT access token
+3. Frontend stores session securely
+4. User ID is passed when establishing WebSocket connection
+5. Backend validates and connects user to Durable Object
 
 ### Key Technologies Explained
 
