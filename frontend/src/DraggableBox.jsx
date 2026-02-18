@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Badge } from '../components/ui/badge'
 
 export default function DraggableBox({ user }) {
   const [position, setPosition] = useState({ x: 100, y: 100 })
@@ -68,11 +69,12 @@ export default function DraggableBox({ user }) {
 
   return (
     <>
-      <div className="fixed top-4 right-4 z-50">
-        <span className={`inline-block px-3 py-1 rounded text-sm ${connected ? 'bg-green-600' : 'bg-red-600'}`}>
-          {connected ? 'Connected' : 'Disconnected'}
-        </span>
-      </div>
+
+    <div className="fixed top-4 right-4 z-50">
+  <Badge variant={connected ? 'success' : 'destructive'}>
+    {connected ? 'Connected' : 'Disconnected'}
+  </Badge>
+    </div>
       <div
         className="fixed w-24 h-24 bg-blue-500 rounded-lg shadow-lg cursor-move flex items-center justify-center text-white font-bold select-none"
         style={{
