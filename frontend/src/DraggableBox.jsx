@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Badge } from '../components/ui/badge'
+import { Badge } from './components/ui/badge'
 
 export default function DraggableBox({ user }) {
   const [position, setPosition] = useState({ x: 100, y: 100 })
