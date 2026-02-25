@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabaseClient'
+import { User } from '@supabase/supabase-js'
 import Login from './Login'
 import DraggableBox from './DraggableBox'
 
 function App() {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
 
-  const cacheUserProfile = async (user) => {
+  const cacheUserProfile = async (user: User) => {
     try {
       await fetch('http://127.0.0.1:8787/cache-user', {
         method: 'POST',

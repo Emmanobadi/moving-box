@@ -1,14 +1,19 @@
-import { useState } from 'react'
+import { useState, FormEvent } from 'react'
 import { supabase } from './supabaseClient'
+import { User } from '@supabase/supabase-js'
 
-export default function Login({ onLogin }) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [isSignUp, setIsSignUp] = useState(false)
+interface LoginProps {
+  onLogin: (user: User) => void
+}
 
-  const handleAuth = async (e) => {
+export default function Login({ onLogin }: LoginProps) {
+  const [email, setEmail] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
+  const [isSignUp, setIsSignUp] = useState<boolean>(false)
+
+  const handleAuth = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
@@ -24,7 +29,9 @@ export default function Login({ onLogin }) {
         onLogin(data.user)
       }
     } catch (error) {
-      setError(error.message)
+      if (error instanceof Error) {
+        setError(error.message)
+      }
     } finally {
       setLoading(false)
     }
@@ -40,7 +47,9 @@ export default function Login({ onLogin }) {
       })
       if (error) throw error
     } catch (error) {
-      setError(error.message)
+      if (error instanceof Error) {
+        setError(error.message)
+      }
     }
   }
 
