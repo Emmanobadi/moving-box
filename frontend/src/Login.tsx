@@ -38,13 +38,13 @@ export default function Login({ onLogin }: LoginProps) {
   }
 
   const handleGoogleSignIn = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: 'http://localhost:5173'
-        }
-      })
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: 'https://moving-box.pages.dev'  // ← CORRECT
+      }
+    })
       if (error) throw error
     } catch (error) {
       if (error instanceof Error) {

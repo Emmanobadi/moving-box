@@ -10,7 +10,7 @@ function App() {
 
   const cacheUserProfile = async (user: User) => {
     try {
-      await fetch('http://127.0.0.1:8787/cache-user', {
+        await fetch(' https://moving-box-worker.emmanaliob.workers.dev/cache-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id, email: user.email })
