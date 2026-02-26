@@ -11,6 +11,14 @@ A real-time web application demonstrating WebSocket-based synchronization using 
 - **Durable Objects** - Persistent state management with Cloudflare Durable Objects
 - **Responsive UI** - Clean, modern interface with Tailwind CSS
 
+## TypeScript Migration
+
+This project is fully typed with TypeScript for production reliability:
+- All `.jsx` files converted to `.tsx`
+- All `.js` files converted to `.ts`
+- Strict type checking enabled
+- Full IDE autocomplete support
+
 ## Tech Stack
 
 **Frontend:**
@@ -25,6 +33,8 @@ A real-time web application demonstrating WebSocket-based synchronization using 
 - Durable Objects - Manages WebSocket connections
 - WebSocket - Enables real-time updates
 
+**Language:** TypeScript (frontend and backend)
+
 ### Database & Auth
 - **Supabase PostgreSQL** - User authentication
 - **Supabase Auth** - JWT-based authentication (Email + Google OAuth)
@@ -35,17 +45,17 @@ A real-time web application demonstrating WebSocket-based synchronization using 
 moving-box/
 ├── frontend/
 │   ├── src/
-│   │   ├── App.jsx              # Main app component with auth logic
-│   │   ├── Login.jsx            # Login/signup UI
-│   │   ├── DraggableBox.jsx     # Draggable box with WebSocket
-│   │   ├── supabaseClient.js    # Supabase configuration
+│   │   ├── App.tsx              # Main app component with auth logic
+│   │   ├── Login.tsx            # Login/signup UI
+│   │   ├── DraggableBox.tsx     # Draggable box with WebSocket
+│   │   ├── supabaseClient.ts    # Supabase configuration
 │   │   └── index.css            # Tailwind imports
-│   ├── tailwind.config.js
+│   ├── tailwind.config.ts
 │   ├── postcss.config.js
 │   └── package.json
 ├── backend/
 │   ├── src/
-│   │   └── index.js             # Worker + Durable Object
+│   │   └── index.ts             # Worker + Durable Object
 │   ├── wrangler.toml            # Cloudflare configuration
 │   └── package.json
 └── README.md
@@ -141,15 +151,28 @@ Open `http://localhost:5173` in multiple browser tabs to test real-time sync.
 
 ### Deployment
 
-**Deploy Worker to Cloudflare:**
+**Backend (Cloudflare Workers):**
 ```bash
 cd backend
 npx wrangler deploy
 ```
+Copy the deployed URL.
 
-**Deploy Frontend:**
+**Frontend (Cloudflare Pages):**
 
-Frontend can be deployed to Vercel, Netlify, or Cloudflare Pages. Update the WebSocket URL in `DraggableBox.jsx` to your deployed Worker URL.
+Update WebSocket URL in `src/DraggableBox.tsx`:
+```typescript
+const websocket = new WebSocket(`wss://YOUR-WORKER-URL/ws?userId=${user.id}`)
+```
+
+Then deploy:
+```bash
+cd frontend
+npm run build
+npx wrangler pages deploy dist
+```
+
+**Live:** https://moving-box.pages.dev
 
 ## Usage
 

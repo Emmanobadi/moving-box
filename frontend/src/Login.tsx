@@ -42,7 +42,7 @@ export default function Login({ onLogin }: LoginProps) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://moving-box.pages.dev'  // ← CORRECT
+        redirectTo: 'https://moving-box.pages.dev' 
       }
     })
       if (error) throw error
